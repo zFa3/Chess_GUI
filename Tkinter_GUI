@@ -20,12 +20,12 @@ PERFT = False
 ALL_THEMES = [
             ["blue", "green", "purple", "red"], # DEFAULT
             ["black", "brown", "grey", "gold"], # GREY RED
-            ["#59E03D", "#3DE0CD", "#3DE15E", "#9DE03D"], # LIGHT BLUE GREEN
-            ["#B89AE3", "#E39ADB", "#E39AAF", "#A09AE3"], # PURPLE TINT
-            ["#E68373", "#E6AB73", "#E69772", "#E67380"], # PEACH FRUIT
-            ["#47E6DD", "#4789E6", "#48BBE6", "#47E6A7"], # OCEAN WATER
-            ["#E67F30", "#E6B330", "#E59D31", "#E65F30"], # AUTUMN COLORS
-            ["#85B2E6", "#85D0E6", "#84E5DC", "#85E69A"] # AQUARIUM BLUE
+            ["#59E03D", "#3DE0CD", "#3DE15E", "#9DE03D"],
+            ["#B89AE3", "#E39ADB", "#E39AAF", "#A09AE3"],
+            ["#E68373", "#E6AB73", "#E69772", "#E67380"],
+            ["#47E6DD", "#4789E6", "#48BBE6", "#47E6A7"],
+            ["#E67F30", "#E6B330", "#E59D31", "#E65F30"],
+            ["#85B2E6", "#85D0E6", "#84E5DC", "#85E69A"]
 ]
 COLORS = ALL_THEMES[0]
 
