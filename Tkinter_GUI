@@ -1,0 +1,245 @@
+#!/usr/bin/env python
+
+import tkinter as tk
+from cleaned import *
+import random
+
+# TODO LIST:
+# Create a game over screen when checkmate/stalemate
+# Create actual pieces not Alphanumeric characters
+# Create a main menu?
+
+
+# you could change these
+SIDE_LEN = 600
+COVER = 235
+END_TIME = 100 # in ms but tkinter is slow so its sometimes longer
+LINE_WID = 1
+PERFT = False
+# [highlight color] [select color] [legal moves] [check color]
+ALL_THEMES = [
+            ["blue", "green", "purple", "red"], # DEFAULT
+            ["black", "brown", "grey", "gold"], # GREY RED
+            ["#59E03D", "#3DE0CD", "#3DE15E", "#9DE03D"], # LIGHT BLUE GREEN
+            ["#B89AE3", "#E39ADB", "#E39AAF", "#A09AE3"], # PURPLE TINT
+            ["#E68373", "#E6AB73", "#E69772", "#E67380"], # PEACH FRUIT
+            ["#47E6DD", "#4789E6", "#48BBE6", "#47E6A7"], # OCEAN WATER
+            ["#E67F30", "#E6B330", "#E59D31", "#E65F30"], # AUTUMN COLORS
+            ["#85B2E6", "#85D0E6", "#84E5DC", "#85E69A"] # AQUARIUM BLUE
+]
+COLORS = ALL_THEMES[0]
+
+# dont change these
+# I mean you could but it could break
+GRID = 8
+PRINT_DEBUG = False
+SQUARELENGTH = (SIDE_LEN//GRID)
+
+def main():
+    # im too lazy to comment the tkinter stuff
+    global click_indexes
+    board = Board()
+    root = tk.Tk()
+    height, width = root.winfo_screenheight(), root.winfo_screenwidth()
+    root.geometry(f"{SIDE_LEN}x{SIDE_LEN}+{(width - SIDE_LEN)//2}+{(height - SIDE_LEN)//2}")
+    root.title("Chess")
+    # create a canvas for the images
+    game_canvas = tk.Canvas(root, width=SIDE_LEN, height=SIDE_LEN)
+    game_canvas.pack()
+    # bind left click to click() function
+    def tts(tup: tuple):
+        return " ".join(tuple(map(str, tup)))
+    click_indexes = []
+    def click(event):
+        global click_indexes, COVER
+        col = event.x//SQUARELENGTH
+        row = event.y//SQUARELENGTH
+        index = (col + row * GRID)
+        click_indexes.append(index)
+        try:
+            if len(click_indexes) == 2:
+                draw()
+                f_ind, t_ind = click_indexes[0], click_indexes[1]
+                f, t = board.twelve_ify(f_ind, t_ind)
+                click_indexes = []
+
+                #print(f_ind, t_ind)
+                for i in (board.legal_moves(board.player, board.board, True, False)):
+                    #print(i[:2] == (f, t))
+                    if i[:2] == (f, t):
+                        if len(i) == 3:
+                            move = tts(i[:2])
+                        else:
+                            move = tts(i)
+
+                promotion = ""
+
+                #print(board.player and t == f - 12 or t == f + 12)
+                if str(board.board[f]).upper() == "P":
+                    #print(board.player and t_ind < 8)
+                    #print(not board.player and t_ind > 55)
+                    #print(t_ind)
+                    if board.player and t_ind < 8:
+                        promotion += input()
+                        if not promotion in "RBNQ":
+                            raise ValueError
+                    elif not board.player and t_ind > 55:
+                        promotion += input()
+                        if not promotion in "rnbq":
+                            raise ValueError
+                    else:
+                        pass
+                
+                if (f_ind, t_ind) in board.cleaned_moves():
+                    #print(board.cleaned_moves())
+                    game_canvas.delete("all")
+                    #print("play_moves", f"{move} {promotion}")
+                    #print(f"{lm}")
+                    board.play_move(f"{move} {promotion}")
+                    draw()
+                if board.is_check():
+                    if board.player:
+                        highlight_spot((board.clean(board.board)).index("K"), False, COLORS[3])
+                    else:
+                        highlight_spot((board.clean(board.board)).index("k"), False, COLORS[3])
+            else:
+                draw()
+                highlight_spot(index, False, COLORS[1])
+                for i in board.cleaned_moves():
+                    #print(i, index)
+                    if i[0] == index:
+                        highlight_spot(i[1], True, COLORS[2])
+        except ValueError: draw()
+        if PRINT_DEBUG:
+            print("Checkmate, Stalemate, Check: ", board.is_mate() == 1, board.is_mate() == 2, board.is_check())
+        if board.is_mate() == 1 or board.is_mate() == 2:
+            COVER = 235
+            for i in range(COVER):
+                root.after(END_TIME//COVER)
+                highlight_spot(random.randint(0, 64), True, ("#%02x%02x%02x" % (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))))
+                game_canvas.update()
+            root.destroy()
+    
+    def highlight_spot(index: int, yes: bool, color):
+        row, col = index % 8, index // 8
+        x, y = row * SQUARELENGTH, col * SQUARELENGTH
+        if yes:
+            game_canvas.create_rectangle(x, y, x + SQUARELENGTH, y + SQUARELENGTH, fill = color, stipple='gray50')
+        else:
+            game_canvas.create_rectangle(x, y, x + SQUARELENGTH, y + SQUARELENGTH, fill = color, stipple='gray75')
+
+    def change_theme(event):
+        global COLORS
+        COLORS = ALL_THEMES[random.randint(0, len(ALL_THEMES) - 1)]
+        draw()
+        for ind, itm in enumerate(COLORS):
+            highlight_spot(ind, False, itm)
+    
+    def show_theme(event):
+        draw()
+        for ind, itm in enumerate(COLORS):
+            highlight_spot(ind, False, itm)
+    
+    def rand_theme(event):
+        global COLORS
+        COLORS = [("#%02x%02x%02x" % (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))) for i in range(4)]
+        draw()
+        for ind, itm in enumerate(COLORS):
+            highlight_spot(ind, False, itm)
+
+    def draw():
+        if PRINT_DEBUG:
+            board.print_board(board.board)
+            print(board.black, board.white)
+            print(board.move_stack)
+        game_canvas.delete("all")
+        # creates the vertical lines
+        for line in range(GRID - 1):
+            # iterates creating the vertical lines
+            game_canvas.create_line(SQUARELENGTH * (line + 1), 0, SQUARELENGTH * (line + 1), SIDE_LEN, width = LINE_WID)
+        # create the horizontal lines
+        for line in range(GRID - 1):
+            game_canvas.create_line(0, SQUARELENGTH * (line + 1), SIDE_LEN, SQUARELENGTH * (line + 1), width = LINE_WID)
+        for index, item in enumerate(board.clean(board.board)):
+            ind_row, ind_col = index // 8, index % 8
+            game_canvas.create_text(ind_col * SQUARELENGTH + SQUARELENGTH//2, ind_row * SQUARELENGTH + SQUARELENGTH//2, text = item, font = ("Courier New", 48, "bold"))
+
+    def right_click(event):
+        col = event.x//SQUARELENGTH
+        row = event.y//SQUARELENGTH
+        index = (col + row * GRID)
+        highlight_spot(index, False, COLORS[0])
+
+    def undo(event):
+        if len(board.move_stack) > 1:
+            board.board = list(
+                            "            "
+                            "            "
+                            "  rnbqkbnr  "
+                            "  pppppppp  "
+                            "  ........  "
+                            "  ........  "
+                            "  ........  "
+                            "  ........  "
+                            "  PPPPPPPP  "
+                            "  RNBQKBNR  "
+                            "            "
+                            "            "
+            )
+            a = board.move_stack[:-2]
+            board.move_stack = []
+            for i in a:
+                board.makeMove(i[0], [i[0]], False, board.player)
+                board.white = i[1]
+                board.black = i[2]
+                board.gst_white = i[3]
+                board.gst_black = i[4]
+                board.player = not board.player
+        draw()
+
+    root.bind("u", undo)
+    root.bind("s", show_theme)
+    root.bind("r", rand_theme)
+    root.bind("t", change_theme)
+    root.bind("<Button-1>", click)
+    root.bind("<Button-2>", right_click)
+    root.bind("<Button-3>", right_click)
+    draw()
+    root.mainloop()
+
+def perft(depth: int, position: Board, prev_moves:list, player: bool):
+    # this is the perft test which stands for PERF ormance T est
+    # and it does two things
+    # it is commonly used to determine twhether move generation is fast
+    # and its also used to make sure all the legal moves of chess have 
+    # been accounted for. As an example, the positions that have been 
+    # commented out near the top of the program may have perft results
+    # next to them, indicating the number of positions searched 
+    global nodes
+    # You could also add a time.perf_counter() into this code and measure
+    # how long perft takes at each depth, but Im not measuring the speed, 
+    # just the accuracy
+    if depth == 0:
+        nodes += 1
+        #input(prev_moves)
+        return
+    br = position.board[:]
+    moves = position.legal_moves(player, position.board, True, False)
+    for i in moves:
+        position.makeMove(i, [i], False, player)
+        prev_moves.append(position.clean_moves(i))
+        perft(depth - 1, position, prev_moves, not player)
+        try:
+            prev_moves.remove(i)
+        except: pass
+        position.board = br[:]
+    #print("\033c", nodes)
+
+if __name__ == "__main__":
+    nodes = 0
+    if PERFT:
+        x = Board()
+        # --> perft (Depth, Position, Empty List, Player)
+        perft(3, x, [], True)
+        print(nodes)
+    main()
