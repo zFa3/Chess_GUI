@@ -72,11 +72,10 @@ def main():
         index = (col + row * GRID)
         click_indexes.append(index)
         try:
-            if len(click_indexes) == 2:
-                draw()
-                f_ind, t_ind = click_indexes[0], click_indexes[1]
+            print(len(click_indexes))
+            if len(click_indexes) > 1:
+                f_ind, t_ind = click_indexes[-2], click_indexes[-1]
                 f, t = board.twelve_ify(f_ind, t_ind)
-                click_indexes = []
 
                 #print(f_ind, t_ind)
                 for i in (board.legal_moves(board.player, board.board, True, False)):
@@ -111,19 +110,19 @@ def main():
                     #print("play_moves", f"{move} {promotion}")
                     #print(f"{lm}")
                     board.play_move(f"{move} {promotion}")
-                    draw()
+                    click_indexes = []
+                    draw(); return
                 if board.is_check():
                     if board.player:
                         highlight_spot((board.clean(board.board)).index("K"), True, COLORS[3])
                     else:
                         highlight_spot((board.clean(board.board)).index("k"), True, COLORS[3])
-            else:
-                draw()
-                highlight_spot(index, True, COLORS[1])
-                for i in board.cleaned_moves():
-                    #print(i, index)
-                    if i[0] == index:
-                        highlight_spot(i[1], True, COLORS[2])
+            draw()
+            highlight_spot(index, True, COLORS[1])
+            for i in board.cleaned_moves():
+                #print(i, index)
+                if i[0] == index:
+                    highlight_spot(i[1], True, COLORS[2])
         except ValueError: draw()
         if PRINT_DEBUG:
             print("Checkmate, Stalemate, Check: ", board.is_mate() == 1, board.is_mate() == 2, board.is_check())
