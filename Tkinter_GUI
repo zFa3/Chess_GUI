@@ -4,28 +4,22 @@ import tkinter as tk
 from Chess_Framework import *
 import random
 
-# TODO LIST:
-# Create a game over screen when checkmate/stalemate
-# Create actual pieces not Alphanumeric characters
-# Create a main menu?
-
-
 # you could change these
 SIDE_LEN = 600
 COVER = 235
 END_TIME = 100 # in ms but tkinter is slow so its sometimes longer
 LINE_WID = 1
 PERFT = False
-# [highlight color] [select color] [legal moves] [check color]
+# [highlight color] [select color] [legal moves] [check color] [Dark sq color] [Light sq Color]
 ALL_THEMES = [
-            ["blue", "green", "purple", "red"], # DEFAULT
-            ["black", "brown", "grey", "gold"], # GREY RED
-            ["#59E03D", "#3DE0CD", "#3DE15E", "#9DE03D"], # LIGHT BLUE GREEN
-            ["#B89AE3", "#E39ADB", "#E39AAF", "#A09AE3"], # PURPLE TINT
-            ["#E68373", "#E6AB73", "#E69772", "#E67380"], # PEACH FRUIT
-            ["#47E6DD", "#4789E6", "#48BBE6", "#47E6A7"], # OCEAN WATER
-            ["#E67F30", "#E6B330", "#E59D31", "#E65F30"], # AUTUMN COLORS
-            ["#85B2E6", "#85D0E6", "#84E5DC", "#85E69A"] # AQUARIUM BLUE
+            ["blue", "green", "purple", "red", "gray", None], # DEFAULT
+            ["black", "brown", "grey", "gold", "gray", None], # GREY RED
+            ["#59E03D", "#3DE0CD", "#3DE15E", "#9DE03D", "gray", None], # LIGHT BLUE GREEN
+            ["#B89AE3", "#E39ADB", "#E39AAF", "#A09AE3", "gray", None], # PURPLE TINT
+            ["#E68373", "#E6AB73", "#E69772", "#E67380", "gray", None], # PEACH FRUIT
+            ["#47E6DD", "#4789E6", "#48BBE6", "#47E6A7", "gray", None], # OCEAN WATER
+            ["#E67F30", "#E6B330", "#E59D31", "#E65F30", "gray", None], # AUTUMN COLORS
+            ["#85B2E6", "#85D0E6", "#84E5DC", "#85E69A", "gray", None] # AQUARIUM BLUE
 ]
 COLORS = ALL_THEMES[0]
 
@@ -115,12 +109,12 @@ def main():
                     draw()
                 if board.is_check():
                     if board.player:
-                        highlight_spot((board.clean(board.board)).index("K"), False, COLORS[3])
+                        highlight_spot((board.clean(board.board)).index("K"), True, COLORS[3])
                     else:
-                        highlight_spot((board.clean(board.board)).index("k"), False, COLORS[3])
+                        highlight_spot((board.clean(board.board)).index("k"), True, COLORS[3])
             else:
                 draw()
-                highlight_spot(index, False, COLORS[1])
+                highlight_spot(index, True, COLORS[1])
                 for i in board.cleaned_moves():
                     #print(i, index)
                     if i[0] == index:
@@ -136,20 +130,22 @@ def main():
                 game_canvas.update()
             root.destroy()
     
-    def highlight_spot(index: int, yes: bool, color):
-        row, col = index % 8, index // 8
-        x, y = row * SQUARELENGTH, col * SQUARELENGTH
-        if yes:
-            game_canvas.create_rectangle(x, y, x + SQUARELENGTH, y + SQUARELENGTH, fill = color, stipple='gray50')
-        else:
-            game_canvas.create_rectangle(x, y, x + SQUARELENGTH, y + SQUARELENGTH, fill = color, stipple='gray75')
+    def highlight_spot(index: int, dark: bool, color):
+        try:
+            row, col = index % 8, index // 8
+            x, y = row * SQUARELENGTH, col * SQUARELENGTH
+            if not dark:
+                game_canvas.create_rectangle(x, y, x + SQUARELENGTH, y + SQUARELENGTH, fill = color, stipple='gray12')
+            else:
+                game_canvas.create_rectangle(x, y, x + SQUARELENGTH, y + SQUARELENGTH, fill = color, stipple='gray75')
+        except: pass
 
     def change_theme(event):
         global COLORS
         COLORS = ALL_THEMES[random.randint(0, len(ALL_THEMES) - 1)]
         draw()
         for ind, itm in enumerate(COLORS):
-            highlight_spot(ind, False, itm)
+            highlight_spot(ind, True, itm)
     
     def show_theme(event):
         draw()
@@ -158,14 +154,13 @@ def main():
     
     def rand_theme(event):
         global COLORS
-        COLORS = [("#%02x%02x%02x" % (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))) for i in range(4)]
+        COLORS = [("#%02x%02x%02x" % (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))) for i in range(6)]
         draw()
         for ind, itm in enumerate(COLORS):
-            highlight_spot(ind, False, itm)
+            highlight_spot(ind, True, itm)
 
     def draw():
         if PRINT_DEBUG:
-            board.print_board(board.board)
             print(board.black, board.white)
             print(board.move_stack)
         game_canvas.delete("all")
@@ -177,6 +172,10 @@ def main():
         for line in range(GRID - 1):
             game_canvas.create_line(0, SQUARELENGTH * (line + 1), SIDE_LEN, SQUARELENGTH * (line + 1), width = LINE_WID)
         for index, item in enumerate(board.clean(board.board)):
+            if ((index % 8) + (index // 8)) % 2 == 1:
+                highlight_spot(index, False, COLORS[4])
+            else:
+                highlight_spot(index, False, COLORS[5])
             ind_row, ind_col = index // 8, index % 8
             game_canvas.create_text(ind_col * SQUARELENGTH + SQUARELENGTH//2, ind_row * SQUARELENGTH + SQUARELENGTH//2, text = UNICODE_PIECES[item], font = ("FreeSerif", 48, "bold"))
 
