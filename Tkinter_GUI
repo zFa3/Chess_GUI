@@ -214,7 +214,7 @@ def main():
                 board.player = not board.player
         draw()
 
-    root.bind("u", undo)
+    #root.bind("u", undo)
     root.bind("s", show_theme)
     root.bind("r", rand_theme)
     root.bind("t", change_theme)
