@@ -360,23 +360,25 @@ class Board:
                     self.black = [False, False]
                 if len(player_inp) == 2:
                     promo = False
-                    #print(self.board[int(player_inp[0])].upper() == "P" and abs(int(player_inp[0]) - int(player_inp[1])) == 24)
-
-                    # if it is en passant
-                    if [player_inp[1]] in self.gst_black or [player_inp[1]] in self.gst_white:
-                        self.board[int(player_inp[1])] = str(self.board[int(player_inp[0])])
-                        self.board[int(player_inp[0])] = "."
-                        self.move_stack.append((player_inp, self.white, self.black, self.gst_white, self.gst_black))
-                        promo = True
-                        if not player:
-                            self.board[int(player_inp[1]) - 12] = "."
-                        else:
+                    # if it is en passant 
+                    # ((self.board[int(player_inp[0])] == "P" and player) or (self.board[int(player_inp[0])] == "p" and not player))
+                    if player:
+                        if ([player_inp[1]] in self.gst_black) and self.board[player_inp[0]] == "P":
+                            self.board[int(player_inp[1])] = str(self.board[int(player_inp[0])])
+                            self.board[int(player_inp[0])] = "."
+                            self.move_stack.append((player_inp, self.white, self.black, self.gst_white, self.gst_black))
                             self.board[int(player_inp[1]) + 12] = "."
+                            promo = True
+                    else:
+                        if ([player_inp[1]] in self.gst_white) and self.board[player_inp[0]] == "p":
+                            self.board[int(player_inp[1])] = str(self.board[int(player_inp[0])])
+                            self.board[int(player_inp[0])] = "."
+                            self.move_stack.append((player_inp, self.white, self.black, self.gst_white, self.gst_black))
+                            self.board[int(player_inp[1]) - 12] = "."
+                            promo = True
                     #self.print_board(self.board)
                     self.gst_white = []; self.gst_black = []
                     
-                    # if it is a promotion
-                    # actually
                     # if it is a double move
                     if self.board[int(player_inp[0])].upper() == "P" and abs(int(player_inp[0]) - int(player_inp[1])) == 24:
                         if player:
