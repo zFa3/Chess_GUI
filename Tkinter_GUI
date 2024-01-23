@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 
-#zFa3 ChessGUI in Python(Tkinter)
-
+# zFa3 ChessGUI in Python(Tkinter)
 import tkinter as tk
 from Chess_Framework import *
 import random
+
+# TODO LIST:
+# Create a main menu?
+
 
 # you could change these
 SIDE_LEN = 600
@@ -188,6 +191,7 @@ def main():
         highlight_spot(index, False, COLORS[0])
 
     def undo(event):
+        print(board.move_stack)
         if len(board.move_stack) > 1:
             board.board = list(
                             "            "
@@ -211,10 +215,9 @@ def main():
                 board.black = i[2]
                 board.gst_white = i[3]
                 board.gst_black = i[4]
-                board.player = not board.player
         draw()
 
-    #root.bind("u", undo)
+    root.bind("u", undo)
     root.bind("s", show_theme)
     root.bind("r", rand_theme)
     root.bind("t", change_theme)
