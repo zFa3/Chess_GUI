@@ -4,7 +4,6 @@
 import tkinter as tk
 from Chess_Framework import *
 import random
-import threading as th
 
 # TODO LIST:
 # Create a main menu?
