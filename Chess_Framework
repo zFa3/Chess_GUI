@@ -1,7 +1,7 @@
 import numpy as np
 PRINT_DEBUG = False
 class Board:
-    def __init__(self):
+    def __init__(self, fen):
         self.move_stack = []
         self.board = list(
                         "            "
@@ -74,6 +74,20 @@ class Board:
                         "            "
                         "            "
                     )'''
+        self.board = list(
+                        "            "
+                        "            "
+                        "  rnbq.k.r  "#
+                        "  pp.Pbppp  "# perft test results
+                        "  ..p.....  "# rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8  
+                        "  ........  "# depth 1 = 44
+                        "  ..B.....  "# depth 2 = 1486
+                        "  ........  "# depth 3 = 62379
+                        "  PPP.NnPP  "# depth 4 = 2103487
+                        "  RNBQK..R  "#
+                        "            "
+                        "            "
+                    )
         self.white, self.black = [True, True], [True, True]
         self.gst_white, self.gst_black = [], []
         self.notation = dict(zip([i + 1 for i in range(9)], [chr(i + 65) for i in range(8)]))
@@ -88,6 +102,8 @@ class Board:
             }
         self.history = []
         self.player = True
+        if not fen == 0:
+            self.set_fen(fen)
 
     def play_move(self, inputX: str):
         self.makeMove(inputX.split(), list(self.legal_moves(self.player, self.board, True, False)), False, self.player)
@@ -122,6 +138,31 @@ class Board:
             return 2
         return 0
     
+    def set_fen(self, fen: str):
+        self.board = list()
+        pos = fen.split()[0]
+        player = fen.split()[1]
+        if player == "w":
+            self.player = True
+        else:
+            self.player = False
+        
+        for _ in range(26):
+            self.board.append(" ")
+        for item in pos:
+            if item == "/":
+                for _ in range(4):
+                    self.board.append(" ")
+
+            elif item.isdigit():
+                for _ in range(int(item)):
+                    self.board.append(".")
+            
+            else:
+                self.board.append(item)
+        for _ in range(26):
+            self.board.append(" ")
+
     def is_check(self):
         leg_OM = (list(zip(*(list(self.legal_moves(not self.player, self.board, False, True)))))[1])
         if self.player:
@@ -290,50 +331,58 @@ class Board:
     
     def clean_moves(self, move):
         alphabet = {
-            1 - 1:"A",
-            2 - 1:"B",
-            3 - 1:"C",
-            4 - 1:"D",
-            5 - 1:"E",
-            6 - 1:"F",
-            7 - 1:"G",
-            8 - 1:"H"
+            0:"A",
+            1:"B",
+            2:"C",
+            3:"D",
+            4:"E",
+            5:"F",
+            6:"G",
+            7:"H"
         }
         from_sq, to_sq = move[0], move[1]
         frow, fcol, trow, tcol = from_sq//12, from_sq%12, to_sq//12, to_sq%12
-        return ((alphabet[fcol - 2], frow- 2, alphabet[tcol - 2], trow - 2))
-    def std(self, string: str):
-        return dict(enumerate((string)))
-    def ltt(self, list: list):
-        new_tup = tuple()
-        for i in list:
-            new_tup += (int(i),)
-        if PRINT_DEBUG:
-            print(new_tup)
-        return new_tup
-
+        return ((alphabet[fcol - 2], abs((frow- 2) - 8), alphabet[tcol - 2], abs((trow - 2 - 8))))
+    def print_board(self, position:str):
+        counter = 0
+        for w in range(12):
+            print("| ", end = "")
+            for l in range(12):
+                if position[counter] == " ":
+                    if len(str(counter)) == 1:
+                        print(f"{counter}  |  ", end = "")
+                    elif len(str(counter)) == 2:
+                        print(f"{counter} |  ", end = "")
+                    elif len(str(counter)) == 3:
+                        print(f"{counter} | ", end = "")
+                else:
+                    print(f"{position[counter]}  |  ", end = "")
+                counter += 1
+            print("\n", "-" * (int(np.sqrt(len(position))*4) + 1), sep = "")
+        
     def makeMove(self, player_inp, lm, is_castle: bool, player: bool):
+        #print(player_inp)
         try:
             player_inp = self.ltt(player_inp)
         except:
             if len(player_inp) == 3:
                 if (int(player_inp[0]), int(player_inp[1]), str(player_inp[2])) in lm:
                     if player:
-                        if len(player_inp) == 3 and player_inp and player_inp[2] in "RBQN":
+                        if len(player_inp) == 3 and player and player_inp[2] in "RBQN":
                             self.board[int(player_inp[1])] = player_inp[2]
                             self.board[int(player_inp[0])] = "."
                             self.gst_white = []; self.gst_black = []
                             self.move_stack.append((player_inp, self.white, self.black, self.gst_white, self.gst_black))
                         else: raise ValueError("Error Invalid Move")
                     else:
-                        if len(player_inp) == 3 and player_inp and player_inp[2] in "rbqn":
+                        if len(player_inp) == 3 and not player and player_inp[2] in "rbqn":
                             self.board[int(player_inp[1])] = player_inp[2]
                             self.board[int(player_inp[0])] = "."
                             self.gst_white = []; self.gst_black = []
                             self.move_stack.append((player_inp, self.white, self.black, self.gst_white, self.gst_black))
-                        else: raise ValueError("Error Invalid Move")
-                else: raise ValueError("Error Invalid Move")
-            else: raise ValueError("Error Invalid Move")
+                        else: raise ValueError(f"Error Invalid Move: move-{player_inp}, player-{player}")
+                else: raise ValueError(f"Error Invalid Move: move-{player_inp}, player-{player}")
+            else: raise ValueError(f"Error Invalid Move: move-{player_inp}, player-{player}")
                 
         else:
             #print(player_inp)
@@ -436,10 +485,21 @@ class Board:
     def lts(self, l: list):
         return "".join(map(str, l))
 
+    def ltt(self, list: list):
+        new_tup = tuple()
+        for i in list:
+            new_tup += (int(i),)
+        return new_tup
+
     def clean(self, board_w_padding: str):
         new_board = ""
         for inx, itm in enumerate(board_w_padding):
             if not inx < 25 or inx > 118 and inx % 12 not in [0, 1, 10, 11]:
                 new_board += itm
         return new_board.replace(" ", "")
-    
+
+if __name__ == "__main__":
+    x = Board(0)
+    x.set_fen("rnbq1k1r/pp1Pbppp/2p5/8/2B5/P7/1PP1NnPP/RNBQK2R b KQ - 0 8")
+    x.print_board(x.board)
+    print(x.player)
