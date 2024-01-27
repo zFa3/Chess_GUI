@@ -73,7 +73,7 @@ class Board:
                         "  ........  "#
                         "            "
                         "            "
-                    )'''
+                    )
         self.board = list(
                         "            "
                         "            "
@@ -87,7 +87,7 @@ class Board:
                         "  RNBQK..R  "#
                         "            "
                         "            "
-                    )
+                    )'''
         self.white, self.black = [True, True], [True, True]
         self.gst_white, self.gst_black = [], []
         self.notation = dict(zip([i + 1 for i in range(9)], [chr(i + 65) for i in range(8)]))
@@ -149,17 +149,17 @@ class Board:
         
         for _ in range(26):
             self.board.append(" ")
-        for item in pos:
-            if item == "/":
+        for character in pos:
+            if character == "/":
                 for _ in range(4):
                     self.board.append(" ")
 
-            elif item.isdigit():
-                for _ in range(int(item)):
+            elif character.isdigit():
+                for _ in range(int(character)):
                     self.board.append(".")
             
             else:
-                self.board.append(item)
+                self.board.append(character)
         for _ in range(26):
             self.board.append(" ")
 
@@ -497,9 +497,4 @@ class Board:
             if not inx < 25 or inx > 118 and inx % 12 not in [0, 1, 10, 11]:
                 new_board += itm
         return new_board.replace(" ", "")
-
-if __name__ == "__main__":
-    x = Board(0)
-    x.set_fen("rnbq1k1r/pp1Pbppp/2p5/8/2B5/P7/1PP1NnPP/RNBQK2R b KQ - 0 8")
-    x.print_board(x.board)
-    print(x.player)
+    
