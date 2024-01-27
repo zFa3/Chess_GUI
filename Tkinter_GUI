@@ -11,6 +11,12 @@ import threading as th
 
 
 # you could change these
+FEN = 0
+FEN = ("""
+
+rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R b KQ - 1 8
+
+""")
 SIDE_LEN = 600
 COVER = 235
 END_TIME = 100 # in ms but tkinter is slow so its sometimes longer
@@ -54,7 +60,7 @@ SQUARELENGTH = (SIDE_LEN//GRID)
 def main():
     # im too lazy to comment the tkinter stuff
     global click_indexes
-    board = Board("rnbq1k1r/pp1Pbppp/2p5/8/2B5/P7/1PP1NnPP/RNBQK2R b KQ - 0 8")
+    board = Board(FEN)
     root = tk.Tk()
     height, width = root.winfo_screenheight(), root.winfo_screenwidth()
     root.geometry(f"{SIDE_LEN}x{SIDE_LEN}+{(width - SIDE_LEN)//2}+{(height - SIDE_LEN)//2}")
@@ -286,13 +292,15 @@ def perft(depth: int, position: Board, player: bool, a: bool):
         if a:
             print(x.clean_moves(i), nodes, move_nodes)
             move_nodes = 0
+        else:
+            print("\t", x.clean_moves(i), nodes, move_nodes)
     #print("\033c", nodes)
 
 if __name__ == "__main__":
     nodes = 0
     move_nodes = 0
     if PERFT:
-        x = Board("rnbq1k1r/pp1Pbppp/2p5/8/2B5/P7/1PP1NnPP/RNBQK2R b KQ - 0 8")
+        x = Board(FEN)
         x.print_board(x.board)
         print(x.player)
         # --> perft (Depth, Position, Empty List, Player)
