@@ -4,6 +4,7 @@
 import tkinter as tk
 from Chess_Framework import *
 import random
+import threading as th
 
 # TODO LIST:
 # Create a main menu?
@@ -14,7 +15,7 @@ SIDE_LEN = 600
 COVER = 235
 END_TIME = 100 # in ms but tkinter is slow so its sometimes longer
 LINE_WID = 1
-PERFT = False
+PERFT = True
 # [highlight color] [select color] [legal moves] [check color] [Dark sq color] [Light sq Color]
 ALL_THEMES = [
             ["blue", "green", "purple", "red", "gray", None], # DEFAULT
@@ -53,7 +54,7 @@ SQUARELENGTH = (SIDE_LEN//GRID)
 def main():
     # im too lazy to comment the tkinter stuff
     global click_indexes
-    board = Board()
+    board = Board(0)
     root = tk.Tk()
     height, width = root.winfo_screenheight(), root.winfo_screenwidth()
     root.geometry(f"{SIDE_LEN}x{SIDE_LEN}+{(width - SIDE_LEN)//2}+{(height - SIDE_LEN)//2}")
@@ -110,6 +111,15 @@ def main():
                     #print("play_moves", f"{move} {promotion}")
                     #print(f"{lm}")
                     board.play_move(f"{move} {promotion}")
+                    if board.is_mate() == 1 or board.is_mate() == 2:
+                        try:
+                            COVER = 235
+                            for i in range(COVER):
+                                root.after(END_TIME//COVER)
+                                highlight_spot(random.randint(0, 64), True, ("#%02x%02x%02x" % (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))))
+                                game_canvas.update()
+                        finally:
+                            root.destroy()
                     click_indexes = []
                     draw(); return
                 if board.is_check():
@@ -164,24 +174,26 @@ def main():
             highlight_spot(ind, True, itm)
 
     def draw():
-        if PRINT_DEBUG:
-            print(board.black, board.white)
-            print(board.move_stack)
-        game_canvas.delete("all")
-        # creates the vertical lines
-        for line in range(GRID - 1):
-            # iterates creating the vertical lines
-            game_canvas.create_line(SQUARELENGTH * (line + 1), 0, SQUARELENGTH * (line + 1), SIDE_LEN, width = LINE_WID)
-        # create the horizontal lines
-        for line in range(GRID - 1):
-            game_canvas.create_line(0, SQUARELENGTH * (line + 1), SIDE_LEN, SQUARELENGTH * (line + 1), width = LINE_WID)
-        for index, item in enumerate(board.clean(board.board)):
-            if ((index % 8) + (index // 8)) % 2 == 1:
-                highlight_spot(index, False, COLORS[4])
-            else:
-                highlight_spot(index, False, COLORS[5])
-            ind_row, ind_col = index // 8, index % 8
-            game_canvas.create_text(ind_col * SQUARELENGTH + SQUARELENGTH//2, ind_row * SQUARELENGTH + SQUARELENGTH//2, text = UNICODE_PIECES[item], font = ("FreeSerif", 48, "bold"))
+        try:
+            if PRINT_DEBUG:
+                print(board.black, board.white)
+                print(board.move_stack)
+            game_canvas.delete("all")
+            # creates the vertical lines
+            for line in range(GRID - 1):
+                # iterates creating the vertical lines
+                game_canvas.create_line(SQUARELENGTH * (line + 1), 0, SQUARELENGTH * (line + 1), SIDE_LEN, width = LINE_WID)
+            # create the horizontal lines
+            for line in range(GRID - 1):
+                game_canvas.create_line(0, SQUARELENGTH * (line + 1), SIDE_LEN, SQUARELENGTH * (line + 1), width = LINE_WID)
+            for index, item in enumerate(board.clean(board.board)):
+                if ((index % 8) + (index // 8)) % 2 == 1:
+                    highlight_spot(index, False, COLORS[4])
+                else:
+                    highlight_spot(index, False, COLORS[5])
+                ind_row, ind_col = index // 8, index % 8
+                game_canvas.create_text(ind_col * SQUARELENGTH + SQUARELENGTH//2, ind_row * SQUARELENGTH + SQUARELENGTH//2, text = UNICODE_PIECES[item], font = ("FreeSerif", 48, "bold"))
+        except: pass
 
     def right_click(event):
         col = event.x//SQUARELENGTH
@@ -226,7 +238,30 @@ def main():
     draw()
     root.mainloop()
 
-def perft(depth: int, position: Board, prev_moves:list, player: bool):
+'''def perft(depth: int, position: Board, prev_moves:list, player: bool, a):
+    # this is the perft test which stands for PERF ormance T est
+    global nodes, move_nodes
+    if depth == 0:
+        #input(prev_moves)
+        nodes += 1; move_nodes += 1
+        return
+    br = position.board[:]
+    print("~~~~~~~~~~~~~",player)
+    moves = position.legal_moves(player, position.board, True, False)
+    for i in moves:
+        position.makeMove(i, [i], False, player)
+        prev_moves.append(position.clean_moves(i))
+        perft(depth - 1, position, prev_moves, not player, False)
+        #th.Thread(target=perft(depth - 1, position, prev_moves, not player, False)).start()
+        try:
+            prev_moves.remove(i)
+        except: pass
+        position.board = br[:]
+        if a:
+            print(x.clean_moves(i), i, nodes, move_nodes)
+            move_nodes = 0
+    #print("\033c", nodes)'''
+def perft(depth: int, position: Board, player: bool):
     # this is the perft test which stands for PERF ormance T est
     # and it does two things
     # it is commonly used to determine twhether move generation is fast
@@ -240,25 +275,23 @@ def perft(depth: int, position: Board, prev_moves:list, player: bool):
     # just the accuracy
     if depth == 0:
         nodes += 1
-        #input(prev_moves)
         return
     br = position.board[:]
     moves = position.legal_moves(player, position.board, True, False)
     for i in moves:
         position.makeMove(i, [i], False, player)
-        prev_moves.append(position.clean_moves(i))
-        perft(depth - 1, position, prev_moves, not player)
-        try:
-            prev_moves.remove(i)
-        except: pass
+        perft(depth - 1, position, bool(not player))
         position.board = br[:]
     #print("\033c", nodes)
 
 if __name__ == "__main__":
     nodes = 0
+    move_nodes = 0
     if PERFT:
-        x = Board()
+        x = Board("rnbq1k1r/pp1Pbppp/2p5/8/2B5/P7/1PP1NnPP/RNBQK2R b KQ - 0 8")
+        x.print_board(x.board)
+        print(x.player)
         # --> perft (Depth, Position, Empty List, Player)
-        perft(3, x, [], True)
-        print(nodes)
+        perft(2, x, x.player)
+        print("total nodes", nodes)
     main()
