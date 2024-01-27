@@ -2,7 +2,8 @@ zFa3 - Chess GUI
 
 This project is made in Python and Tkinter
 Chess Programming Wiki (Chessprogramming.org)
-was very helpful
+was very helpful, I also used lots of open source
+projects
 
 Apologize for the messy code, still learning
 
