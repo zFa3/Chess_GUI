@@ -54,7 +54,7 @@ SQUARELENGTH = (SIDE_LEN//GRID)
 def main():
     # im too lazy to comment the tkinter stuff
     global click_indexes
-    board = Board(0)
+    board = Board("rnbq1k1r/pp1Pbppp/2p5/8/2B5/P7/1PP1NnPP/RNBQK2R b KQ - 0 8")
     root = tk.Tk()
     height, width = root.winfo_screenheight(), root.winfo_screenwidth()
     root.geometry(f"{SIDE_LEN}x{SIDE_LEN}+{(width - SIDE_LEN)//2}+{(height - SIDE_LEN)//2}")
@@ -261,7 +261,7 @@ def main():
             print(x.clean_moves(i), i, nodes, move_nodes)
             move_nodes = 0
     #print("\033c", nodes)'''
-def perft(depth: int, position: Board, player: bool):
+def perft(depth: int, position: Board, player: bool, a: bool):
     # this is the perft test which stands for PERF ormance T est
     # and it does two things
     # it is commonly used to determine twhether move generation is fast
@@ -269,19 +269,23 @@ def perft(depth: int, position: Board, player: bool):
     # been accounted for. As an example, the positions that have been 
     # commented out near the top of the program may have perft results
     # next to them, indicating the number of positions searched 
-    global nodes
+    global nodes, move_nodes
     # You could also add a time.perf_counter() into this code and measure
     # how long perft takes at each depth, but Im not measuring the speed, 
     # just the accuracy
     if depth == 0:
         nodes += 1
+        move_nodes += 1
         return
     br = position.board[:]
     moves = position.legal_moves(player, position.board, True, False)
     for i in moves:
         position.makeMove(i, [i], False, player)
-        perft(depth - 1, position, bool(not player))
+        perft(depth - 1, position, bool(not player), False)
         position.board = br[:]
+        if a:
+            print(x.clean_moves(i), nodes, move_nodes)
+            move_nodes = 0
     #print("\033c", nodes)
 
 if __name__ == "__main__":
@@ -292,6 +296,6 @@ if __name__ == "__main__":
         x.print_board(x.board)
         print(x.player)
         # --> perft (Depth, Position, Empty List, Player)
-        perft(2, x, x.player)
+        perft(2, x, x.player, True)
         print("total nodes", nodes)
     main()
