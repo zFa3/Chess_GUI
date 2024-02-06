@@ -4,23 +4,26 @@
 import tkinter as tk
 from Chess_Framework import *
 import random
+import threading as th
 
 # TODO LIST:
 # Create a main menu?
 
 
-# you could change these
+# you could change these variables
+
 FEN = 0
 FEN = ("""
 
-rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R b KQ - 1 8
+r1b2b1r/8/np3ppq/pPnpP1P1/4k2p/PBp4N/R1P1KP1P/B5R1 w - - 6 41
 
 """)
 SIDE_LEN = 600
 COVER = 235
 END_TIME = 100 # in ms but tkinter is slow so its sometimes longer
 LINE_WID = 1
-PERFT = True
+PERFT = False
+DEPTH = 3
 # [highlight color] [select color] [legal moves] [check color] [Dark sq color] [Light sq Color]
 ALL_THEMES = [
             ["blue", "green", "purple", "red", "gray", None], # DEFAULT
@@ -78,7 +81,7 @@ def main():
         index = (col + row * GRID)
         click_indexes.append(index)
         try:
-            print(len(click_indexes))
+            #print(len(click_indexes))
             if len(click_indexes) > 1:
                 f_ind, t_ind = click_indexes[-2], click_indexes[-1]
                 f, t = board.twelve_ify(f_ind, t_ind)
@@ -149,12 +152,12 @@ def main():
                 game_canvas.update()
             root.destroy()
     
-    def highlight_spot(index: int, dark: bool, color):
+    def highlight_spot(index: int, light: bool, color):
         try:
             row, col = index % 8, index // 8
             x, y = row * SQUARELENGTH, col * SQUARELENGTH
-            if not dark:
-                game_canvas.create_rectangle(x, y, x + SQUARELENGTH, y + SQUARELENGTH, fill = color, stipple='gray12')
+            if not light:
+                game_canvas.create_rectangle(x, y, x + SQUARELENGTH, y + SQUARELENGTH, fill = color)
             else:
                 game_canvas.create_rectangle(x, y, x + SQUARELENGTH, y + SQUARELENGTH, fill = color, stipple='gray75')
         except: pass
@@ -207,7 +210,8 @@ def main():
         highlight_spot(index, False, COLORS[0])
 
     def undo(event):
-        print(board.move_stack)
+        if PRINT_DEBUG: 
+            print(board.move_stack)
         if len(board.move_stack) > 1:
             board.board = list(
                             "            "
@@ -303,6 +307,6 @@ if __name__ == "__main__":
         x.print_board(x.board)
         print(x.player)
         # --> perft (Depth, Position, Empty List, Player)
-        perft(2, x, x.player, True)
+        perft(DEPTH, x, x.player, True)
         print("total nodes", nodes)
     main()
