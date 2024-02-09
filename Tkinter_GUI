@@ -4,7 +4,6 @@
 import tkinter as tk
 from Chess_Framework import *
 import random
-import threading as th
 
 
 FEN = ("None")
@@ -44,171 +43,186 @@ UNICODE_PIECES = {
 }
 
 GRID = 8
-SQUARELENGTH = (SIDE_LEN//GRID)
 
 def main():
-    global click_indexes
-    board = Board(FEN)
     root = tk.Tk()
     height, width = root.winfo_screenheight(), root.winfo_screenwidth()
-    root.geometry(f"{SIDE_LEN}x{SIDE_LEN}+{(width - SIDE_LEN)//2}+{(height - SIDE_LEN)//2}")
-    root.title("Chess")
-    game_canvas = tk.Canvas(root, width=SIDE_LEN, height=SIDE_LEN)
-    game_canvas.pack()
-    def tts(tup: tuple):
-        return " ".join(tuple(map(str, tup)))
-    click_indexes = []
-    def click(event):
-        global click_indexes, COVER
-        col = event.x//SQUARELENGTH
-        row = event.y//SQUARELENGTH
-        index = (col + row * GRID)
-        click_indexes.append(index)
-        try:
-            if len(click_indexes) > 1:
-                f_ind, t_ind = click_indexes[-2], click_indexes[-1]
-                f, t = board.twelve_ify(f_ind, t_ind)
-                for i in (board.legal_moves(board.player, board.board, True, False)):
-                    if i[:2] == (f, t):
-                        if len(i) == 3:
-                            move = tts(i[:2])
-                        else:
-                            move = tts(i)
-                promotion = ""
-                if str(board.board[f]).upper() == "P":
-                    if board.player and t_ind < 8:
-                        promotion += input()
-                        if not promotion in "RBNQ":
-                            raise ValueError
-                    elif not board.player and t_ind > 55:
-                        promotion += input()
-                        if not promotion in "rnbq":
-                            raise ValueError
-                    else:
-                        pass
-                
-                if (f_ind, t_ind) in board.cleaned_moves():
-                    game_canvas.delete("all")
-                    board.play_move(f"{move} {promotion}")
-                    if board.is_mate() == 1 or board.is_mate() == 2:
-                        try:
-                            COVER = 235
-                            for i in range(COVER):
-                                root.after(END_TIME//COVER)
-                                highlight_spot(random.randint(0, 64), True, ("#%02x%02x%02x" % (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))))
-                                game_canvas.update()
-                        finally:
-                            root.destroy()
-                    click_indexes = []
-                    draw(); return
+    #root.title("Main Menu")
+    #root.geometry(f"{SIDE_LEN}x{SIDE_LEN}+{(width - SIDE_LEN)//2}+{(height - SIDE_LEN)//2}")
+    #root.resizable(False, False)
+
+    def Game():
+        global click_indexes
+        board = Board(FEN)
+        Game_Window = tk.Toplevel(root)
+        Game_Window.geometry(f"{SIDE_LEN}x{SIDE_LEN}+{(width - SIDE_LEN)//2}+{(height - SIDE_LEN)//2}")
+        Game_Window.title("Chess")
+        game_canvas = tk.Canvas(Game_Window, width=SIDE_LEN, height=SIDE_LEN)
+        game_canvas.pack()
+        def tts(tup: tuple):
+            return " ".join(tuple(map(str, tup)))
+        click_indexes = []
+
+        def resize(e):
+            global SIDE_LEN
+            SIDE_LEN = min(Game_Window.winfo_width(), Game_Window.winfo_height())
             draw()
-            highlight_spot(index, True, COLORS[1])
-            for i in board.cleaned_moves():
-                if i[0] == index:
-                    highlight_spot(i[1], True, COLORS[2])
-        except ValueError: draw()
-        if board.is_mate() == 1 or board.is_mate() == 2:
-            COVER = 235
-            for i in range(COVER):
-                root.after(END_TIME//COVER)
-                highlight_spot(random.randint(0, 64), True, ("#%02x%02x%02x" % (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))))
-                game_canvas.update()
-            root.destroy()
-    
-    def highlight_spot(index: int, light: bool, color):
-        try:
-            row, col = index % 8, index // 8
-            x, y = row * SQUARELENGTH, col * SQUARELENGTH
-            if not light:
-                game_canvas.create_rectangle(x, y, x + SQUARELENGTH, y + SQUARELENGTH, fill = color)
-            else:
-                game_canvas.create_rectangle(x, y, x + SQUARELENGTH, y + SQUARELENGTH, fill = color, stipple='gray75')
-        except Exception as Error: print(Error)
 
-    def change_theme(event):
-        global COLORS
-        COLORS = ALL_THEMES[random.randint(0, len(ALL_THEMES) - 1)]
-        draw()
-        for ind, itm in enumerate(COLORS):
-            highlight_spot(ind, True, itm)
-    
-    def show_theme(event):
-        draw()
-        for ind, itm in enumerate(COLORS):
-            highlight_spot(ind, False, itm)
-    
-    def rand_theme(event):
-        global COLORS
-        COLORS = [("#%02x%02x%02x" % (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))) for i in range(6)]
-        draw()
-        for ind, itm in enumerate(COLORS):
-            highlight_spot(ind, True, itm)
-
-    def draw():
-        game_canvas.delete("all")
-        if board.is_check():
-            if board.player:
-                highlight_spot((board.clean(board.board)).index("K"), False, "red")
-            else:
-                highlight_spot((board.clean(board.board)).index("k"), False, "red")
-        try:
-            # creates the vertical lines
-            for line in range(GRID - 1):
-                # iterates creating the vertical lines
-                game_canvas.create_line(SQUARELENGTH * (line + 1), 0, SQUARELENGTH * (line + 1), SIDE_LEN, width = LINE_WID)
-            # create the horizontal lines
-            for line in range(GRID - 1):
-                game_canvas.create_line(0, SQUARELENGTH * (line + 1), SIDE_LEN, SQUARELENGTH * (line + 1), width = LINE_WID)
-            for index, item in enumerate(board.clean(board.board)):
-                if ((index % 8) + (index // 8)) % 2 == 1:
-                    highlight_spot(index, False, COLORS[4])
+        def click(event):
+            global click_indexes, COVER
+            col = event.x//(SIDE_LEN//GRID)
+            row = event.y//(SIDE_LEN//GRID)
+            index = (col + row * GRID)
+            click_indexes.append(index)
+            try:
+                if len(click_indexes) > 1:
+                    f_ind, t_ind = click_indexes[-2], click_indexes[-1]
+                    f, t = board.twelve_ify(f_ind, t_ind)
+                    for i in (board.legal_moves(board.player, board.board, True, False)):
+                        if i[:2] == (f, t):
+                            if len(i) == 3:
+                                move = tts(i[:2])
+                            else:
+                                move = tts(i)
+                    promotion = ""
+                    if str(board.board[f]).upper() == "P":
+                        if board.player and t_ind < 8:
+                            promotion += input()
+                            if not promotion in "RBNQ":
+                                raise ValueError
+                        elif not board.player and t_ind > 55:
+                            promotion += input()
+                            if not promotion in "rnbq":
+                                raise ValueError
+                        else:
+                            pass
+                    
+                    if (f_ind, t_ind) in board.cleaned_moves():
+                        game_canvas.delete("all")
+                        board.play_move(f"{move} {promotion}")
+                        if board.is_mate() == 1 or board.is_mate() == 2:
+                            try:
+                                COVER = 235
+                                for i in range(COVER):
+                                    Game_Window.after(END_TIME//COVER)
+                                    highlight_spot(random.randint(0, 64), True, ("#%02x%02x%02x" % (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))))
+                                    game_canvas.update()
+                            finally:
+                                Game_Window.destroy()
+                        click_indexes = []
+                        draw(); return
+                draw()
+                highlight_spot(index, True, COLORS[1])
+                for i in board.cleaned_moves():
+                    if i[0] == index:
+                        highlight_spot(i[1], True, COLORS[2])
+            except ValueError: draw()
+            if board.is_mate() == 1 or board.is_mate() == 2:
+                COVER = 235
+                for i in range(COVER):
+                    Game_Window.after(END_TIME//COVER)
+                    highlight_spot(random.randint(0, 64), True, ("#%02x%02x%02x" % (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))))
+                    game_canvas.update()
+                Game_Window.destroy()
+        
+        def highlight_spot(index: int, light: bool, color):
+            try:
+                row, col = index % 8, index // 8
+                x, y = row * (SIDE_LEN//GRID), col * (SIDE_LEN//GRID)
+                if not light:
+                    game_canvas.create_rectangle(x, y, x + (SIDE_LEN//GRID), y + (SIDE_LEN//GRID), fill = color)
                 else:
-                    highlight_spot(index, False, COLORS[5])
-                ind_row, ind_col = index // 8, index % 8
-                game_canvas.create_text(ind_col * SQUARELENGTH + SQUARELENGTH//2, ind_row * SQUARELENGTH + SQUARELENGTH//2, text = UNICODE_PIECES[item], font = ("FreeSerif", 48))
-        except: pass
+                    game_canvas.create_rectangle(x, y, x + (SIDE_LEN//GRID), y + (SIDE_LEN//GRID), fill = color, stipple='gray75')
+            except Exception as Error: print(Error)
 
-    def right_click(event):
-        col = event.x//SQUARELENGTH
-        row = event.y//SQUARELENGTH
-        index = (col + row * GRID)
-        highlight_spot(index, False, COLORS[0])
+        def change_theme(event):
+            global COLORS
+            COLORS = ALL_THEMES[random.randint(0, len(ALL_THEMES) - 1)]
+            draw()
+            for ind, itm in enumerate(COLORS):
+                highlight_spot(ind, True, itm)
+        
+        def show_theme(event):
+            draw()
+            for ind, itm in enumerate(COLORS):
+                highlight_spot(ind, False, itm)
+        
+        def rand_theme(event):
+            global COLORS
+            COLORS = [("#%02x%02x%02x" % (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))) for i in range(6)]
+            draw()
+            for ind, itm in enumerate(COLORS):
+                highlight_spot(ind, True, itm)
 
-    def undo(event):
-        if len(board.move_stack) > 1:
-            board.board = list(
-                            "            "
-                            "            "
-                            "  rnbqkbnr  "
-                            "  pppppppp  "
-                            "  ........  "
-                            "  ........  "
-                            "  ........  "
-                            "  ........  "
-                            "  PPPPPPPP  "
-                            "  RNBQKBNR  "
-                            "            "
-                            "            "
-            )
-            a = board.move_stack[:-2]
-            board.move_stack = []
-            for i in a:
-                board.makeMove(i[0], [i[0]], False, board.player)
-                board.white = i[1]
-                board.black = i[2]
-                board.gst_white = i[3]
-                board.gst_black = i[4]
+        def draw():
+            game_canvas.config(width=SIDE_LEN, height=SIDE_LEN)
+            game_canvas.delete("all")
+            if board.is_check():
+                if board.player:
+                    highlight_spot((board.clean(board.board)).index("K"), False, "red")
+                else:
+                    highlight_spot((board.clean(board.board)).index("k"), False, "red")
+            try:
+                # creates the vertical lines
+                for line in range(GRID - 1):
+                    # iterates creating the vertical lines
+                    game_canvas.create_line((SIDE_LEN//GRID) * (line + 1), 0, (SIDE_LEN//GRID) * (line + 1), SIDE_LEN, width = LINE_WID)
+                # create the horizontal lines
+                for line in range(GRID - 1):
+                    game_canvas.create_line(0, (SIDE_LEN//GRID) * (line + 1), SIDE_LEN, (SIDE_LEN//GRID) * (line + 1), width = LINE_WID)
+                for index, item in enumerate(board.clean(board.board)):
+                    if ((index % 8) + (index // 8)) % 2 == 1:
+                        highlight_spot(index, False, COLORS[4])
+                    else:
+                        highlight_spot(index, False, COLORS[5])
+                    ind_row, ind_col = index // 8, index % 8
+                    game_canvas.create_text(ind_col * (SIDE_LEN//GRID) + (SIDE_LEN//GRID)//2, ind_row * (SIDE_LEN//GRID) + (SIDE_LEN//GRID)//2, text = UNICODE_PIECES[item], font = ("FreeSerif", SIDE_LEN//12))
+            except: pass
+            game_canvas.update()
+
+        def right_click(event):
+            col = event.x//(SIDE_LEN//GRID)
+            row = event.y//(SIDE_LEN//GRID)
+            index = (col + row * GRID)
+            highlight_spot(index, False, COLORS[0])
+
+        def undo(event):
+            if len(board.move_stack) > 1:
+                board.board = list(
+                                "            "
+                                "            "
+                                "  rnbqkbnr  "
+                                "  pppppppp  "
+                                "  ........  "
+                                "  ........  "
+                                "  ........  "
+                                "  ........  "
+                                "  PPPPPPPP  "
+                                "  RNBQKBNR  "
+                                "            "
+                                "            "
+                )
+                a = board.move_stack[:-2]
+                board.move_stack = []
+                for i in a:
+                    board.makeMove(i[0], [i[0]], False, board.player)
+                    board.white = i[1]
+                    board.black = i[2]
+                    board.gst_white = i[3]
+                    board.gst_black = i[4]
+            draw()
+
+        Game_Window.bind("u", undo)
+        Game_Window.bind("s", show_theme)
+        Game_Window.bind("r", rand_theme)
+        Game_Window.bind("t", change_theme)
+        Game_Window.bind("<Button-1>", click)
+        Game_Window.bind("<Button-2>", right_click)
+        Game_Window.bind("<Button-3>", right_click)
+        Game_Window.bind("<Configure>", resize)
         draw()
-
-    root.bind("u", undo)
-    root.bind("s", show_theme)
-    root.bind("r", rand_theme)
-    root.bind("t", change_theme)
-    root.bind("<Button-1>", click)
-    root.bind("<Button-2>", right_click)
-    root.bind("<Button-3>", right_click)
-    draw()
-    root.mainloop()
+        Game_Window.mainloop()
+    Game()
 
 def perft(depth: int, position: Board, player: bool, a: bool):
     # this is the perft test which stands for PERF ormance T est
@@ -239,9 +253,9 @@ def perft(depth: int, position: Board, player: bool, a: bool):
             print("\t", x.clean_moves(i), nodes, move_nodes)
 
 if __name__ == "__main__":
-    nodes = 0
-    move_nodes = 0
     if PERFT:
+        nodes = 0
+        move_nodes = 0
         x = Board(FEN)
         x.print_board(x.board)
         print(x.player)
