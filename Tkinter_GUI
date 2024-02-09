@@ -43,6 +43,8 @@ UNICODE_PIECES = {
     ".":" "
 }
 
+# dont change these
+# I mean you could but it could break
 GRID = 8
 PRINT_DEBUG = False
 SQUARELENGTH = (SIDE_LEN//GRID)
@@ -188,7 +190,7 @@ def main():
                 else:
                     highlight_spot(index, False, COLORS[5])
                 ind_row, ind_col = index // 8, index % 8
-                game_canvas.create_text(ind_col * SQUARELENGTH + SQUARELENGTH//2, ind_row * SQUARELENGTH + SQUARELENGTH//2, text = UNICODE_PIECES[item], font = ("FreeSerif", 48, "bold"))
+                game_canvas.create_text(ind_col * SQUARELENGTH + SQUARELENGTH//2, ind_row * SQUARELENGTH + SQUARELENGTH//2, text = UNICODE_PIECES[item], font = ("FreeSerif", 48))
         except: pass
 
     def right_click(event):
@@ -235,29 +237,6 @@ def main():
     draw()
     root.mainloop()
 
-'''def perft(depth: int, position: Board, prev_moves:list, player: bool, a):
-    # this is the perft test which stands for PERF ormance T est
-    global nodes, move_nodes
-    if depth == 0:
-        #input(prev_moves)
-        nodes += 1; move_nodes += 1
-        return
-    br = position.board[:]
-    print("~~~~~~~~~~~~~",player)
-    moves = position.legal_moves(player, position.board, True, False)
-    for i in moves:
-        position.makeMove(i, [i], False, player)
-        prev_moves.append(position.clean_moves(i))
-        perft(depth - 1, position, prev_moves, not player, False)
-        #th.Thread(target=perft(depth - 1, position, prev_moves, not player, False)).start()
-        try:
-            prev_moves.remove(i)
-        except: pass
-        position.board = br[:]
-        if a:
-            print(x.clean_moves(i), i, nodes, move_nodes)
-            move_nodes = 0
-    #print("\033c", nodes)'''
 def perft(depth: int, position: Board, player: bool, a: bool):
     # this is the perft test which stands for PERF ormance T est
     # and it does two things
