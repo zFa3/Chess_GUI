@@ -43,8 +43,6 @@ UNICODE_PIECES = {
     ".":" "
 }
 
-# dont change these
-# I mean you could but it could break
 GRID = 8
 PRINT_DEBUG = False
 SQUARELENGTH = (SIDE_LEN//GRID)
@@ -120,11 +118,6 @@ def main():
                             root.destroy()
                     click_indexes = []
                     draw(); return
-                if board.is_check():
-                    if board.player:
-                        highlight_spot((board.clean(board.board)).index("K"), True, COLORS[3])
-                    else:
-                        highlight_spot((board.clean(board.board)).index("k"), True, COLORS[3])
             draw()
             highlight_spot(index, True, COLORS[1])
             for i in board.cleaned_moves():
@@ -150,7 +143,7 @@ def main():
                 game_canvas.create_rectangle(x, y, x + SQUARELENGTH, y + SQUARELENGTH, fill = color)
             else:
                 game_canvas.create_rectangle(x, y, x + SQUARELENGTH, y + SQUARELENGTH, fill = color, stipple='gray75')
-        except: pass
+        except Exception as Error: print(Error)
 
     def change_theme(event):
         global COLORS
@@ -172,11 +165,14 @@ def main():
             highlight_spot(ind, True, itm)
 
     def draw():
+        game_canvas.delete("all")
+        print(board.is_check(), (board.clean(board.board)).index("K") if board.player else (board.clean(board.board)).index("k"))
+        if board.is_check():
+            if board.player:
+                highlight_spot((board.clean(board.board)).index("K"), False, "red")
+            else:
+                highlight_spot((board.clean(board.board)).index("k"), False, "red")
         try:
-            if PRINT_DEBUG:
-                print(board.black, board.white)
-                print(board.move_stack)
-            game_canvas.delete("all")
             # creates the vertical lines
             for line in range(GRID - 1):
                 # iterates creating the vertical lines
