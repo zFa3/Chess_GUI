@@ -6,18 +6,8 @@ from Chess_Framework import *
 import random
 import threading as th
 
-# TODO LIST:
-# Create a main menu?
 
-
-# you could change these variables
-
-FEN = 0
-FEN = ("""
-
-r1b2b1r/8/np3ppq/pPnpP1P1/4k2p/PBp4N/R1P1KP1P/B5R1 w - - 6 41
-
-""")
+FEN = ("None")
 SIDE_LEN = 600
 COVER = 235
 END_TIME = 100 # in ms but tkinter is slow so its sometimes longer
