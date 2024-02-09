@@ -43,8 +43,6 @@ UNICODE_PIECES = {
     ".":" "
 }
 
-# dont change these
-# I mean you could but it could break
 GRID = 8
 PRINT_DEBUG = False
 SQUARELENGTH = (SIDE_LEN//GRID)
