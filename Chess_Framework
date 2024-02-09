@@ -1,3 +1,7 @@
+#!usr/bin/env python3
+
+# Chess framework - zFa3
+
 import numpy as np
 PRINT_DEBUG = False
 class Board:
@@ -102,7 +106,7 @@ class Board:
             }
         self.history = []
         self.player = True
-        if not fen == 0:
+        if not fen == "None":
             self.set_fen(fen)
 
     def play_move(self, inputX: str):
