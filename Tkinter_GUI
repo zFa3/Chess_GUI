@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# zFa3 ChessGUI in Python(Tkinter)
+# zFa3 - ChessGUI in Python(Tkinter)
 import tkinter as tk
 from Chess_Framework import *
 import random
@@ -44,21 +44,17 @@ UNICODE_PIECES = {
 }
 
 GRID = 8
-PRINT_DEBUG = False
 SQUARELENGTH = (SIDE_LEN//GRID)
 
 def main():
-    # im too lazy to comment the tkinter stuff
     global click_indexes
     board = Board(FEN)
     root = tk.Tk()
     height, width = root.winfo_screenheight(), root.winfo_screenwidth()
     root.geometry(f"{SIDE_LEN}x{SIDE_LEN}+{(width - SIDE_LEN)//2}+{(height - SIDE_LEN)//2}")
     root.title("Chess")
-    # create a canvas for the images
     game_canvas = tk.Canvas(root, width=SIDE_LEN, height=SIDE_LEN)
     game_canvas.pack()
-    # bind left click to click() function
     def tts(tup: tuple):
         return " ".join(tuple(map(str, tup)))
     click_indexes = []
@@ -69,27 +65,17 @@ def main():
         index = (col + row * GRID)
         click_indexes.append(index)
         try:
-            #print(len(click_indexes))
             if len(click_indexes) > 1:
                 f_ind, t_ind = click_indexes[-2], click_indexes[-1]
                 f, t = board.twelve_ify(f_ind, t_ind)
-
-                #print(f_ind, t_ind)
                 for i in (board.legal_moves(board.player, board.board, True, False)):
-                    #print(i[:2] == (f, t))
                     if i[:2] == (f, t):
                         if len(i) == 3:
                             move = tts(i[:2])
                         else:
                             move = tts(i)
-
                 promotion = ""
-
-                #print(board.player and t == f - 12 or t == f + 12)
                 if str(board.board[f]).upper() == "P":
-                    #print(board.player and t_ind < 8)
-                    #print(not board.player and t_ind > 55)
-                    #print(t_ind)
                     if board.player and t_ind < 8:
                         promotion += input()
                         if not promotion in "RBNQ":
@@ -102,10 +88,7 @@ def main():
                         pass
                 
                 if (f_ind, t_ind) in board.cleaned_moves():
-                    #print(board.cleaned_moves())
                     game_canvas.delete("all")
-                    #print("play_moves", f"{move} {promotion}")
-                    #print(f"{lm}")
                     board.play_move(f"{move} {promotion}")
                     if board.is_mate() == 1 or board.is_mate() == 2:
                         try:
@@ -121,12 +104,9 @@ def main():
             draw()
             highlight_spot(index, True, COLORS[1])
             for i in board.cleaned_moves():
-                #print(i, index)
                 if i[0] == index:
                     highlight_spot(i[1], True, COLORS[2])
         except ValueError: draw()
-        if PRINT_DEBUG:
-            print("Checkmate, Stalemate, Check: ", board.is_mate() == 1, board.is_mate() == 2, board.is_check())
         if board.is_mate() == 1 or board.is_mate() == 2:
             COVER = 235
             for i in range(COVER):
@@ -166,7 +146,6 @@ def main():
 
     def draw():
         game_canvas.delete("all")
-        print(board.is_check(), (board.clean(board.board)).index("K") if board.player else (board.clean(board.board)).index("k"))
         if board.is_check():
             if board.player:
                 highlight_spot((board.clean(board.board)).index("K"), False, "red")
@@ -196,8 +175,6 @@ def main():
         highlight_spot(index, False, COLORS[0])
 
     def undo(event):
-        if PRINT_DEBUG: 
-            print(board.move_stack)
         if len(board.move_stack) > 1:
             board.board = list(
                             "            "
@@ -260,7 +237,6 @@ def perft(depth: int, position: Board, player: bool, a: bool):
             move_nodes = 0
         else:
             print("\t", x.clean_moves(i), nodes, move_nodes)
-    #print("\033c", nodes)
 
 if __name__ == "__main__":
     nodes = 0
