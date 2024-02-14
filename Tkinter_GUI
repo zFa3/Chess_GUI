@@ -15,7 +15,7 @@ PERFT = False
 DEPTH = 3
 # [highlight color] [select color] [legal moves] [check color] [Dark sq color] [Light sq Color]
 ALL_THEMES = [
-            ["blue", "green", "purple", "red", "gray", None], # DEFAULT
+            ["blue", "green", "orange", "red", "gray", None], # DEFAULT
             ["black", "brown", "grey", "gold", "gray", None], # GREY RED
             ["#59E03D", "#3DE0CD", "#3DE15E", "#9DE03D", "gray", None], # LIGHT BLUE GREEN
             ["#B89AE3", "#E39ADB", "#E39AAF", "#A09AE3", "gray", None], # PURPLE TINT
@@ -44,12 +44,69 @@ UNICODE_PIECES = {
 
 GRID = 8
 
+def rgb_to_hex(r, g, b):
+    return "#%02x%02x%02x" % (r, g, b)
+
 def main():
     root = tk.Tk()
     height, width = root.winfo_screenheight(), root.winfo_screenwidth()
-    #root.title("Main Menu")
-    #root.geometry(f"{SIDE_LEN}x{SIDE_LEN}+{(width - SIDE_LEN)//2}+{(height - SIDE_LEN)//2}")
-    #root.resizable(False, False)
+    root.title("Main Menu")
+    root.geometry(f"{SIDE_LEN}x{SIDE_LEN}+{(width - SIDE_LEN)//2}+{(height - SIDE_LEN)//2}")
+    root.resizable(False, False)
+    R1 = tk.IntVar(root)
+    G1 = tk.IntVar(root)
+    B1 = tk.IntVar(root)
+
+    R2 = tk.IntVar(root)
+    G2 = tk.IntVar(root)
+    B2 = tk.IntVar(root)
+
+    R3 = tk.IntVar(root)
+    G3 = tk.IntVar(root)
+    B3 = tk.IntVar(root)
+
+    def custom_theme():
+
+        def a(_):
+            global COLORS
+            tk.Label(theme_cutomizer, width=25, height=7, background = rgb_to_hex(int(R1.get() * 2.55), int(G1.get() * 2.55), int(B1.get() * 2.55))).place(x = 400, y = 25)
+            tk.Label(theme_cutomizer, width=25, height=7, background = rgb_to_hex(int(R2.get() * 2.55), int(G2.get() * 2.55), int(B2.get() * 2.55))).place(x = 400, y = 160)
+            tk.Label(theme_cutomizer, width=25, height=7, background = rgb_to_hex(int(R3.get() * 2.55), int(G3.get() * 2.55), int(B3.get() * 2.55))).place(x = 400, y = 300)
+            
+            tk.Label(theme_cutomizer, width=25, height=3, background = rgb_to_hex(abs(int(R1.get() * 2.55) - 255), abs(int(G1.get() * 2.55) - 255), abs(int(B1.get() * 2.55) - 255))).place(x = 400, y = 105)
+            tk.Label(theme_cutomizer, width=25, height=3, background = rgb_to_hex(abs(int(R2.get() * 2.55) - 255), abs(int(G2.get() * 2.55) - 255), abs(int(B2.get() * 2.55) - 255))).place(x = 400, y = 245)
+            tk.Label(theme_cutomizer, width=25, height=3, background = rgb_to_hex(abs(int(R3.get() * 2.55) - 255), abs(int(G3.get() * 2.55) - 255), abs(int(B3.get() * 2.55) - 255))).place(x = 400, y = 385)
+            
+            COLORS = []
+            COLORS.append(rgb_to_hex(int(R1.get() * 2.55), int(G1.get() * 2.55), int(B1.get() * 2.55)))
+            COLORS.append(rgb_to_hex(int(R2.get() * 2.55), int(G2.get() * 2.55), int(B2.get() * 2.55)))
+            COLORS.append(rgb_to_hex(int(R3.get() * 2.55), int(G3.get() * 2.55), int(B3.get() * 2.55)))
+
+            COLORS.append(rgb_to_hex(abs(int(R1.get() * 2.55) - 255), abs(int(G1.get() * 2.55) - 255), abs(int(B1.get() * 2.55) - 255)))
+            COLORS.append(rgb_to_hex(abs(int(R2.get() * 2.55) - 255), abs(int(G2.get() * 2.55) - 255), abs(int(B2.get() * 2.55) - 255)))
+            COLORS.append(rgb_to_hex(abs(int(R3.get() * 2.55) - 255), abs(int(G3.get() * 2.55) - 255), abs(int(B3.get() * 2.55) - 255)))
+
+        theme_cutomizer = tk.Toplevel(root, bg = "black")
+        theme_cutomizer.title("Theme Customizer")
+        theme_cutomizer.geometry(f"{SIDE_LEN}x{SIDE_LEN}+{(width - SIDE_LEN)//2}+{(height - SIDE_LEN)//2}")
+        theme_cutomizer.resizable(False, False)
+
+        a(1)
+
+        tk.Scale(theme_cutomizer, bigincrement=0.2, width=15, length=100, variable=R1).place(x = 151, y = 25)
+        tk.Scale(theme_cutomizer, bigincrement=0.2, width=15, length=100, variable=G1).place(x = 201, y = 25)
+        tk.Scale(theme_cutomizer, bigincrement=0.2, width=15, length=100, variable=B1).place(x = 251, y = 25)
+
+        tk.Scale(theme_cutomizer, bigincrement=0.2, width=15, length=100, variable=R2).place(x = 151, y = 175)
+        tk.Scale(theme_cutomizer, bigincrement=0.2, width=15, length=100, variable=G2).place(x = 201, y = 175)
+        tk.Scale(theme_cutomizer, bigincrement=0.2, width=15, length=100, variable=B2).place(x = 251, y = 175)
+        
+        tk.Scale(theme_cutomizer, bigincrement=0.2, width=15, length=100, variable=R3).place(x = 151, y = 335)
+        tk.Scale(theme_cutomizer, bigincrement=0.2, width=15, length=100, variable=G3).place(x = 201, y = 335)
+        tk.Scale(theme_cutomizer, bigincrement=0.2, width=15, length=100, variable=B3).place(x = 251, y = 335)        
+
+        tk.Button(theme_cutomizer, text="DONE", width=35, height=3, bg="white", relief="solid", command=theme_cutomizer.destroy).place(x = 150, y = 485)
+        theme_cutomizer.bind("<ButtonRelease-1>", a)
 
     def Game():
         global click_indexes
@@ -63,7 +120,7 @@ def main():
             return " ".join(tuple(map(str, tup)))
         click_indexes = []
 
-        def resize(e):
+        def resize(_):
             global SIDE_LEN
             SIDE_LEN = min(Game_Window.winfo_width(), Game_Window.winfo_height())
             draw()
@@ -105,12 +162,15 @@ def main():
                                 COVER = 235
                                 for i in range(COVER):
                                     Game_Window.after(END_TIME//COVER)
-                                    highlight_spot(random.randint(0, 64), True, ("#%02x%02x%02x" % (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))))
+                                    highlight_spot(random.randint(0, 64), False, ("#%02x%02x%02x" % (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))))
                                     game_canvas.update()
                             finally:
                                 Game_Window.destroy()
                         click_indexes = []
-                        draw(); return
+                        try:
+                            draw()
+                        finally:
+                            return
                 draw()
                 highlight_spot(index, True, COLORS[1])
                 for i in board.cleaned_moves():
@@ -119,10 +179,12 @@ def main():
             except ValueError: draw()
             if board.is_mate() == 1 or board.is_mate() == 2:
                 COVER = 235
-                for i in range(COVER):
-                    Game_Window.after(END_TIME//COVER)
-                    highlight_spot(random.randint(0, 64), True, ("#%02x%02x%02x" % (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))))
-                    game_canvas.update()
+                try:
+                    for i in range(COVER):
+                        Game_Window.after(END_TIME//COVER)
+                        highlight_spot(random.randint(0, 64), False, ("#%02x%02x%02x" % (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))))
+                        game_canvas.update()
+                except: pass
                 Game_Window.destroy()
         
         def highlight_spot(index: int, light: bool, color):
@@ -184,7 +246,7 @@ def main():
             col = event.x//(SIDE_LEN//GRID)
             row = event.y//(SIDE_LEN//GRID)
             index = (col + row * GRID)
-            highlight_spot(index, False, COLORS[0])
+            highlight_spot(index, True, COLORS[0])
 
         def undo(event):
             if len(board.move_stack) > 1:
@@ -222,7 +284,13 @@ def main():
         Game_Window.bind("<Configure>", resize)
         draw()
         Game_Window.mainloop()
-    Game()
+        #Game()
+
+    Play_Button = tk.Button(root, width=20, height=2, text = "PLAY", command=Game)
+    Play_Button.place(x = 225, y = 275)
+    Theme_Button = tk.Button(root, width=20, height=2, text = "THEME", command=custom_theme)
+    Theme_Button.place(x = 225, y = 325)
+    root.mainloop()
 
 def perft(depth: int, position: Board, player: bool, a: bool):
     # this is the perft test which stands for PERF ormance T est
