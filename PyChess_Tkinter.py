@@ -13,16 +13,17 @@ END_TIME = 100 # in ms but tkinter is slow so its sometimes longer
 LINE_WID = 1
 PERFT = False
 DEPTH = 3
+Counter = 0
 # [highlight color] [select color] [legal moves] [check color] [Dark sq color] [Light sq Color]
 ALL_THEMES = [
-            ["blue", "green", "orange", "red", "gray", None], # DEFAULT
-            ["black", "brown", "grey", "gold", "gray", None], # GREY RED
-            ["#59E03D", "#3DE0CD", "#3DE15E", "#9DE03D", "gray", None], # LIGHT BLUE GREEN
-            ["#B89AE3", "#E39ADB", "#E39AAF", "#A09AE3", "gray", None], # PURPLE TINT
-            ["#E68373", "#E6AB73", "#E69772", "#E67380", "gray", None], # PEACH FRUIT
-            ["#47E6DD", "#4789E6", "#48BBE6", "#47E6A7", "gray", None], # OCEAN WATER
-            ["#E67F30", "#E6B330", "#E59D31", "#E65F30", "gray", None], # AUTUMN COLORS
-            ["#85B2E6", "#85D0E6", "#84E5DC", "#85E69A", "gray", None] # AQUARIUM BLUE
+            ["blue", "green", "orange", "red", "gray", "white"], # DEFAULT
+            ["black", "brown", "grey", "gold", "gray", "white"], # GREY RED
+            ["#59E03D", "#3DE0CD", "#3DE15E", "#9DE03D", "gray", "white"], # LIGHT BLUE GREEN
+            ["#B89AE3", "#E39ADB", "#E39AAF", "#A09AE3", "gray", "white"], # PURPLE TINT
+            ["#E68373", "#E6AB73", "#E69772", "#E67380", "gray", "white"], # PEACH FRUIT
+            ["#47E6DD", "#4789E6", "#48BBE6", "#47E6A7", "gray", "white"], # OCEAN WATER
+            ["#E67F30", "#E6B330", "#E59D31", "#E65F30", "gray", "white"], # AUTUMN COLORS
+            ["#85B2E6", "#85D0E6", "#84E5DC", "#85E69A", "gray", "white"] # AQUARIUM BLUE
 ]
 COLORS = ALL_THEMES[0]
 
@@ -127,7 +128,8 @@ def main():
             draw()
 
         def click(event):
-            global click_indexes, COVER
+            global click_indexes, COVER, Counter
+            Counter += 1
             col = event.x//(SIDE_LEN//GRID)
             row = event.y//(SIDE_LEN//GRID)
             index = (col + row * GRID)
@@ -173,7 +175,8 @@ def main():
                         finally:
                             return
                 draw()
-                highlight_spot(index, True, COLORS[1])
+                if not board.is_check():
+                    highlight_spot(index, True, COLORS[1])
                 for i in board.cleaned_moves():
                     if i[0] == index:
                         highlight_spot(i[1], True, COLORS[2])
@@ -196,7 +199,7 @@ def main():
                     game_canvas.create_rectangle(x, y, x + (SIDE_LEN//GRID), y + (SIDE_LEN//GRID), fill = color)
                 else:
                     game_canvas.create_rectangle(x, y, x + (SIDE_LEN//GRID), y + (SIDE_LEN//GRID), fill = color, stipple='gray75')
-            except Exception as Error: print(Error)
+            except Exception as Error: pass
 
         def change_theme(event):
             global COLORS
@@ -218,9 +221,20 @@ def main():
                 highlight_spot(ind, True, itm)
 
         def draw():
-            game_canvas.config(width=SIDE_LEN, height=SIDE_LEN)
-            game_canvas.delete("all")
+            global Counter
+            #game_canvas.config(width=SIDE_LEN, height=SIDE_LEN)
+            # clear the board every 50 clicks, to prevent strobing
+            # as well as lag due to layers
+            if Counter == 50:
+                Counter = 0
+                game_canvas.delete("all")
             try:
+                # make the pattern first (so its in the back)
+                for index, item in enumerate(board.clean(board.board)):
+                    if ((index % 8) + (index // 8)) % 2 == 1:
+                        highlight_spot(index, False, COLORS[4])
+                    else:
+                        highlight_spot(index, False, COLORS[5])
                 # creates the vertical lines
                 for line in range(GRID - 1):
                     # iterates creating the vertical lines
@@ -233,15 +247,12 @@ def main():
                         highlight_spot((board.clean(board.board)).index("K"), False, "red")
                     else:
                         highlight_spot((board.clean(board.board)).index("k"), False, "red")
-                game_canvas.update()
+                # create the pieces last
                 for index, item in enumerate(board.clean(board.board)):
-                    if ((index % 8) + (index // 8)) % 2 == 1:
-                        highlight_spot(index, False, COLORS[4])
-                    else:
-                        highlight_spot(index, False, COLORS[5])
                     ind_row, ind_col = index // 8, index % 8
                     game_canvas.create_text(ind_col * (SIDE_LEN//GRID) + (SIDE_LEN//GRID)//2, ind_row * (SIDE_LEN//GRID) + (SIDE_LEN//GRID)//2, text = UNICODE_PIECES[item], font = ("FreeSerif", SIDE_LEN//12))
             except: pass
+            game_canvas.update()
 
         def right_click(event):
             col = event.x//(SIDE_LEN//GRID)
