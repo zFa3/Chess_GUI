@@ -1,4 +1,3 @@
-import numpy as np
 PRINT_DEBUG = False
 class Board:
     def __init__(self, fen):
@@ -91,7 +90,7 @@ class Board:
         self.white, self.black = [True, True], [True, True]
         self.gst_white, self.gst_black = [], []
         self.notation = dict(zip([i + 1 for i in range(9)], [chr(i + 65) for i in range(8)]))
-        U, D, L, R = int(-(np.sqrt(len(self.board)))), int(np.sqrt(len(self.board))), -1, 1
+        U, D, L, R = int(-(self.sqrt(len(self.board)))), int(self.sqrt(len(self.board))), -1, 1
         self.dirs = {
             "N": ((U + U + L, U + U + R, L + L + U, L + L + D, R + R + U, R + R + D, D + D + L, D + D + R), False),
             "B": ((U + L, U + R, D + L, D + R), True),
@@ -294,6 +293,8 @@ class Board:
                 return sorted(self.check_lg(legal_moves, player))
             else:
                 return legal_moves
+            
+    def sqrt(z): return z ** 0.5
 
     def check_lg(self, leg_moves: list, player: bool):
         nlm = leg_moves[:]
@@ -358,7 +359,7 @@ class Board:
                 else:
                     print(f"{position[counter]}  |  ", end = "")
                 counter += 1
-            print("\n", "-" * (int(np.sqrt(len(position))*4) + 1), sep = "")
+            print("\n", "-" * (int(self.sqrt(len(position))*4) + 1), sep = "")
         
     def makeMove(self, player_inp, lm, is_castle: bool, player: bool):
         #print(player_inp)
@@ -497,4 +498,3 @@ class Board:
             if not inx < 25 or inx > 118 and inx % 12 not in [0, 1, 10, 11]:
                 new_board += itm
         return new_board.replace(" ", "")
-    
