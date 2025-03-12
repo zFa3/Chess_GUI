@@ -294,7 +294,7 @@ class Board:
             else:
                 return legal_moves
             
-    def sqrt(z): return z ** 0.5
+    def sqrt(self, z): return z ** 0.5
 
     def check_lg(self, leg_moves: list, player: bool):
         nlm = leg_moves[:]
